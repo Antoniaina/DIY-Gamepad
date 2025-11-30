@@ -2,6 +2,7 @@ mod packet;
 
 use packet::Packet;
 use std::io::Read;
+use vigem_client::{Client, TargetId, XGamepad, XButtons, Xbox360Wired};
 
 fn main() {
     let port_name = "COM4";
@@ -14,6 +15,14 @@ fn main() {
             eprintln!("Failed opening port: {}", e);
         })
         .unwrap();
+
+    let client = Client::connect().expect("Failed to connect to ViGEM");
+    let mut controller = Xbox360Wired::new(client, TargetId::XBOX360_WIRED);
+
+    controller.plugin().expect("Failed to  plugin virtual controller");
+    controller.wait_ready().unwrap();
+
+    let mut pad = XGamepad::default();
 
     let mut header = [0u8; 1];
 
