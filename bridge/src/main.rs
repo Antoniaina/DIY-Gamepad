@@ -1,8 +1,13 @@
 mod packet;
+mod controls;
+mod mapper;
 
 use packet::Packet;
+use controls::ControllerState;
+use mapper::map_to_xgamepad;
+
+use vigem_client::{Client, TargetId, Xbox360Wired};
 use std::io::Read;
-use vigem_client::{Client, TargetId, XGamepad, XButtons, Xbox360Wired};
 
 fn main() {
     let port_name = "COM4";
@@ -17,12 +22,10 @@ fn main() {
         .unwrap();
 
     let client = Client::connect().expect("Failed to connect to ViGEM");
-    let mut controller = Xbox360Wired::new(client, TargetId::XBOX360_WIRED);
+    let mut target = Xbox360Wired::new(client, TargetId::XBOX360_WIRED);
 
-    controller.plugin().expect("Failed to  plugin virtual controller");
-    controller.wait_ready().unwrap();
-
-    let mut pad = XGamepad::default();
+    target.plugin().expect("Failed to  plugin virtual controller");
+    target.wait_ready().unwrap();
 
     let mut header = [0u8; 1];
 
@@ -34,6 +37,9 @@ fn main() {
             if port.read_exact(&mut buffer[1..]).is_ok() {
                 if let Some(payload) = Packet::parse(&buffer) {
                     println!("{:#?}", payload);
+                    let state = ControllerState::from_packet(&payload);
+                    let pad = map_to_xgamepad(&state);
+                    target.update(&pad).unwrap();
                 }
                 else {
                     println!("Error reading packet body");

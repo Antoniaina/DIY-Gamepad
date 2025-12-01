@@ -1,13 +1,13 @@
 #[repr(C, packed)]
 #[derive(Debug)]
 pub struct Packet {
-    header: u8,
-    j1x: u16,
-    j1y: u16,
-    j1b: u8,
-    j2x: u16,
-    j2y: u16,
-    j2b: u8,
+    pub header: u8,
+    pub j1x: u16,
+    pub j1y: u16,
+    pub j1b: u8,
+    pub j2x: u16,
+    pub j2y: u16,
+    pub j2b: u8,
     checksum: u8,
 }
 
